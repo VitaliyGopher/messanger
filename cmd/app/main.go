@@ -1,11 +1,10 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
-	"github.com/VitaliyGopher/messanger/internal/config"
-	"github.com/VitaliyGopher/messanger/internal/router"
+	"github.com/BurntSushi/toml"
+	"github.com/VitaliyGopher/messanger/internal/app/server"
 )
 
 var (
@@ -13,17 +12,17 @@ var (
 )
 
 func main() {
-	cfg, err := config.NewConfig(CONFIG_PATH)
+	config := server.NewConfig()
+	_, err := toml.DecodeFile(CONFIG_PATH, &config)
 	if err != nil {
-		log.Fatalf("Error with config: %s", err)
+		log.Fatal(err)
 	}
 
-	r := router.NewRouter()
-
-	addr := fmt.Sprintf("%s%s", cfg.Host, cfg.Port)
-	r.Run(addr)
+	if err := server.Start(config); err != nil {
+		log.Fatal(err)
+	}
 }
 
-// TODO: Телефон -> код (generate + verefication)       
+// TODO: Телефон -> код (generate + verefication)
 // 		 JWT generate token
-//       Refreshing token    
+//       Refreshing token

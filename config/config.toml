@@ -1,2 +1,7 @@
 host = 'localhost'
 port = ':8080'
+
+db_username = 'postgres'
+db_password = 'postgres'
+db_name = 'messanger'
+db_sslmode = 'disable'
