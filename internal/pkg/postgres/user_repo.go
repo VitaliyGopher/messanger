@@ -11,6 +11,12 @@ type UserRepo struct {
 	store *Storage
 }
 
+func NewUserRepo(s *Storage) *UserRepo {
+	return &UserRepo{
+		store: s,
+	}
+}
+
 func (r *UserRepo) Create(u *model.User) error {
 	return r.store.DB.QueryRow(
 		"INSERT INTO users (phone, username) VALUES ($1, $2) RETURNING id;",

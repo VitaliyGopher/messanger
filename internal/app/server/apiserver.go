@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/VitaliyGopher/messanger/internal/app/sms"
 	"github.com/VitaliyGopher/messanger/internal/pkg/postgres"
 	"github.com/gin-gonic/gin"
 
@@ -14,12 +15,14 @@ import (
 type server struct {
 	router *gin.Engine
 	store  postgres.Storage
+	sms    SmsInterface
 }
 
-func newServer(store postgres.Storage) *server {
+func newServer(store postgres.Storage, sms SmsInterface) *server {
 	s := &server{
 		router: gin.Default(),
 		store:  store,
+		sms: sms,
 	}
 
 	s.configureRouter()
@@ -44,7 +47,12 @@ func Start(config *Config) error {
 	defer db.Close()
 
 	store := postgres.New(db)
-	s := newServer(*store)
+	smsRepo := postgres.NewSmsRepo(store)
+	userRepo := postgres.NewUserRepo(store)
+
+	sms := sms.New(smsRepo, userRepo)
+
+	s := newServer(*store, sms)
 
 	return s.router.Run(config.Host + config.Port)
 }

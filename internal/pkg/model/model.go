@@ -5,3 +5,9 @@ type User struct {
 	Username    string
 	PhoneNumber string
 }
+
+type Sms struct {
+	Phone     string
+	Code      int
+	Timestamp int64
+}
