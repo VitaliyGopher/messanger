@@ -5,11 +5,18 @@ import (
 
 	"github.com/BurntSushi/toml"
 	"github.com/VitaliyGopher/messanger/internal/app/server"
+	"github.com/VitaliyGopher/messanger/pkg/env"
 )
 
 var (
 	CONFIG_PATH string = "config/config.toml"
 )
+
+func init() {
+	if err := env.Load(); err != nil {
+		log.Fatal(err)
+	}
+}
 
 func main() {
 	config := server.NewConfig()
@@ -22,7 +29,3 @@ func main() {
 		log.Fatal(err)
 	}
 }
-
-// TODO: Телефон -> код (generate + verefication)
-// 		 JWT generate token
-//       Refreshing token

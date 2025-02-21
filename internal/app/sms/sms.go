@@ -1,6 +1,8 @@
 package sms
 
 import (
+	"database/sql"
+	"errors"
 	"math/rand"
 	"time"
 
@@ -27,7 +29,7 @@ func (s *Sms) SendSmsCode(phone string) (*model.Sms, error) {
 
 	sms, err := s.SmsRepo.FindSmsCode(sms)
 	if err != nil {
-		if err.Error() != "sql: no rows in result set" {
+		if err != sql.ErrNoRows {
 			return nil, err
 		}
 	}
@@ -53,4 +55,34 @@ func (s *Sms) SendSmsCode(phone string) (*model.Sms, error) {
 	s.SmsRepo.CreateSmsCode(sms)
 
 	return sms, nil
+}
+
+func (s *Sms) CheckSmsCode(phone string, code int) (*model.User, error) {
+	check_sms := &model.Sms{
+		Phone: phone,
+		Code: code,
+	}
+
+	db_sms, err := s.SmsRepo.FindSmsCode(check_sms)
+	if err != nil {
+		return nil, err
+	}
+
+	if check_sms.Code != db_sms.Code {
+		return nil, errors.New("wrong code")
+	}
+
+	if db_sms.Timestamp < time.Now().Unix() {
+		return nil, errors.New("sms is expired")
+	}
+
+	u, err := s.UserRepo.FindByPhoneNumber(check_sms.Phone)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, errors.New("user not exists")
+		}
+		return nil, err
+	}
+
+	return u, nil
 }

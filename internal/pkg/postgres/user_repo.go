@@ -49,7 +49,7 @@ func (r *UserRepo) FindByPhoneNumber(phone string) (*model.User, error) {
 	u := &model.User{}
 
 	if err := r.store.DB.QueryRow(
-		"SELECT id, username, phone FROM users WHERE phone = $1",
+		"SELECT user_id, username, phone FROM users WHERE phone = $1",
 		phone,
 	).Scan(&u.ID,
 		&u.Username,

@@ -2,8 +2,9 @@ package server
 
 import (
 	"net/http"
-	"time"
+	"strconv"
 
+	"github.com/VitaliyGopher/messanger/internal/pkg/model"
 	"github.com/gin-gonic/gin"
 )
 
@@ -16,10 +17,36 @@ func (s *server) SendSmsCodeHandler(c *gin.Context) {
 	sms, err := s.sms.SendSmsCode(phone)
 	if err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
 
 	c.IndentedJSON(http.StatusOK, gin.H{
 		"code":       sms.Code,
-		"smsExpires": sms.Timestamp - time.Now().Unix(),
+		"smsExpires": sms.Timestamp,
 	})
+}
+
+func (s *server) GetJWT(c *gin.Context) {
+	phone := c.PostForm("phone")
+	code := c.PostForm("code")
+
+	code_int, _ := strconv.Atoi(code)
+
+	s.jwt.UserRepo.Create(&model.User{
+		PhoneNumber: phone,
+	})
+
+	u, err := s.sms.CheckSmsCode(phone, code_int)
+	if err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	token, err := s.jwt.CreateJWT(int(u.ID))
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.IndentedJSON(http.StatusCreated, gin.H{"jwt": token})
 }

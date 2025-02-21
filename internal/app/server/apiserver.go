@@ -1,10 +1,13 @@
 package server
 
 import (
+	"crypto/rand"
+	"crypto/rsa"
 	"database/sql"
 	"fmt"
 	"log"
 
+	jwttoken "github.com/VitaliyGopher/messanger/internal/app/auth"
 	"github.com/VitaliyGopher/messanger/internal/app/sms"
 	"github.com/VitaliyGopher/messanger/internal/pkg/postgres"
 	"github.com/gin-gonic/gin"
@@ -16,13 +19,15 @@ type server struct {
 	router *gin.Engine
 	store  postgres.Storage
 	sms    SmsInterface
+	jwt    jwttoken.JWT
 }
 
-func newServer(store postgres.Storage, sms SmsInterface) *server {
+func newServer(store postgres.Storage, sms SmsInterface, jwt jwttoken.JWT) *server {
 	s := &server{
 		router: gin.Default(),
 		store:  store,
-		sms: sms,
+		sms:    sms,
+		jwt:    jwt,
 	}
 
 	s.configureRouter()
@@ -52,7 +57,13 @@ func Start(config *Config) error {
 
 	sms := sms.New(smsRepo, userRepo)
 
-	s := newServer(*store, sms)
+	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		log.Fatalf("error in generating rsa keys: %s", err)
+	}
+	jwt := jwttoken.New(privateKey, userRepo)
+
+	s := newServer(*store, sms, jwt)
 
 	return s.router.Run(config.Host + config.Port)
 }
