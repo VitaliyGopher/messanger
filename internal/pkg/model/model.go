@@ -3,11 +3,11 @@ package model
 type User struct {
 	ID          uint
 	Username    string
-	PhoneNumber string
+	Email string
 }
 
-type Sms struct {
-	Phone     string
+type VerifyCode struct {
+	Email     string
 	Code      int
 	Timestamp int64
 }

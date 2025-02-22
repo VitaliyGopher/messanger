@@ -19,8 +19,8 @@ func NewUserRepo(s *Storage) *UserRepo {
 
 func (r *UserRepo) Create(u *model.User) error {
 	return r.store.DB.QueryRow(
-		"INSERT INTO users (phone, username) VALUES ($1, $2) RETURNING id;",
-		u.PhoneNumber,
+		"INSERT INTO users (email, username) VALUES ($1, $2) RETURNING user_id;",
+		u.Email,
 		u.Username,
 	).Scan(&u.ID)
 }
@@ -29,11 +29,11 @@ func (r *UserRepo) FindByID(id uint) (*model.User, error) {
 	u := &model.User{}
 
 	if err := r.store.DB.QueryRow(
-		"SELECT id, username, phone FROM users WHERE id = $1",
+		"SELECT id, username, email FROM users WHERE id = $1",
 		id,
 	).Scan(&u.ID,
 		&u.Username,
-		&u.PhoneNumber,
+		&u.Email,
 	); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, errors.New("rows not found")
@@ -45,20 +45,16 @@ func (r *UserRepo) FindByID(id uint) (*model.User, error) {
 	return u, nil
 }
 
-func (r *UserRepo) FindByPhoneNumber(phone string) (*model.User, error) {
+func (r *UserRepo) FindByEmail(email string) (*model.User, error) {
 	u := &model.User{}
 
 	if err := r.store.DB.QueryRow(
-		"SELECT user_id, username, phone FROM users WHERE phone = $1",
-		phone,
+		"SELECT user_id, username, email FROM users WHERE email = $1",
+		email,
 	).Scan(&u.ID,
 		&u.Username,
-		&u.PhoneNumber,
+		&u.Email,
 	); err != nil {
-		if err == sql.ErrNoRows {
-			return nil, errors.New("rows not found")
-		}
-
 		return nil, err
 	}
 

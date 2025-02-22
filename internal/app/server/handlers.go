@@ -12,9 +12,9 @@ func (s *server) Ping(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gin.H{"message": "pong"})
 }
 
-func (s *server) SendSmsCodeHandler(c *gin.Context) {
-	phone := c.PostForm("phone")
-	sms, err := s.sms.SendSmsCode(phone)
+func (s *server) SendCodeHandler(c *gin.Context) {
+	email := c.PostForm("email")
+	sms, err := s.verifyCode.SendCode(email)
 	if err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -27,16 +27,20 @@ func (s *server) SendSmsCodeHandler(c *gin.Context) {
 }
 
 func (s *server) GetJWT(c *gin.Context) {
-	phone := c.PostForm("phone")
+	email := c.PostForm("email")
 	code := c.PostForm("code")
 
 	code_int, _ := strconv.Atoi(code)
 
-	s.jwt.UserRepo.Create(&model.User{
-		PhoneNumber: phone,
+	err := s.jwt.UserRepo.Create(&model.User{
+		Email: email,
 	})
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 
-	u, err := s.sms.CheckSmsCode(phone, code_int)
+	u, err := s.verifyCode.CheckCode(email, code_int)
 	if err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

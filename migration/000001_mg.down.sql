@@ -1,2 +1,2 @@
-DROP TABLE sms_codes;
+DROP TABLE verification_codes;
 DROP TABLE users;

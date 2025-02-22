@@ -8,7 +8,7 @@ import (
 	"log"
 
 	jwttoken "github.com/VitaliyGopher/messanger/internal/app/auth"
-	"github.com/VitaliyGopher/messanger/internal/app/sms"
+	"github.com/VitaliyGopher/messanger/internal/app/verification_code"
 	"github.com/VitaliyGopher/messanger/internal/pkg/postgres"
 	"github.com/gin-gonic/gin"
 
@@ -16,18 +16,18 @@ import (
 )
 
 type server struct {
-	router *gin.Engine
-	store  postgres.Storage
-	sms    SmsInterface
-	jwt    jwttoken.JWT
+	router     *gin.Engine
+	store      postgres.Storage
+	verifyCode VerifyCodeInterface
+	jwt        jwttoken.JWT
 }
 
-func newServer(store postgres.Storage, sms SmsInterface, jwt jwttoken.JWT) *server {
+func newServer(store postgres.Storage, verifyCode VerifyCodeInterface, jwt jwttoken.JWT) *server {
 	s := &server{
-		router: gin.Default(),
-		store:  store,
-		sms:    sms,
-		jwt:    jwt,
+		router:     gin.Default(),
+		store:      store,
+		verifyCode: verifyCode,
+		jwt:        jwt,
 	}
 
 	s.configureRouter()
@@ -52,10 +52,10 @@ func Start(config *Config) error {
 	defer db.Close()
 
 	store := postgres.New(db)
-	smsRepo := postgres.NewSmsRepo(store)
+	verifyCodeRepo := postgres.NewVerifyCodeRepo(store)
 	userRepo := postgres.NewUserRepo(store)
 
-	sms := sms.New(smsRepo, userRepo)
+	verifyCode := verification_code.New(verifyCodeRepo, userRepo)
 
 	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
@@ -63,7 +63,7 @@ func Start(config *Config) error {
 	}
 	jwt := jwttoken.New(privateKey, userRepo)
 
-	s := newServer(*store, sms, jwt)
+	s := newServer(*store, verifyCode, jwt)
 
 	return s.router.Run(config.Host + config.Port)
 }
