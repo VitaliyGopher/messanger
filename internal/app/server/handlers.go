@@ -32,13 +32,9 @@ func (s *server) GetJWT(c *gin.Context) {
 
 	code_int, _ := strconv.Atoi(code)
 
-	err := s.jwt.UserRepo.Create(&model.User{
+	s.jwt.UserRepo.Create(&model.User{
 		Email: email,
 	})
-	if err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
 
 	u, err := s.verifyCode.CheckCode(email, code_int)
 	if err != nil {
@@ -46,11 +42,20 @@ func (s *server) GetJWT(c *gin.Context) {
 		return
 	}
 
-	token, err := s.jwt.CreateJWT(int(u.ID))
+	access_token, err := s.jwt.CreateAccessJWT(int(u.ID))
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	
+	refresh_token, err := s.jwt.CreateRefreshJWT(int(u.ID))
 	if err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.IndentedJSON(http.StatusCreated, gin.H{"jwt": token})
+	c.IndentedJSON(http.StatusCreated, gin.H{
+		"access_token": access_token,
+		"refresh_token": refresh_token,
+	})
 }

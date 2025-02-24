@@ -3,16 +3,37 @@ package auth
 import (
 	"crypto/rsa"
 	"errors"
+	"os"
+	"strconv"
 	"time"
 
 	"github.com/golang-jwt/jwt"
 )
 
-func GenerateJWT(uid int, privateKey *rsa.PrivateKey) (string, error) {
+func GenerateAccessJWT(uid int, privateKey *rsa.PrivateKey) (string, error) {
+	exp, _ := strconv.Atoi(os.Getenv("jwt_access_exp"))
 	claims := jwt.MapClaims{
 		"sub": uid,
 		"iat": time.Now().Unix(),
-		"exp": time.Now().Add(time.Minute).Unix(),
+		"exp": time.Now().Add(time.Duration(exp) * time.Minute).Unix(),
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+
+	tokenString, err := token.SignedString(privateKey)
+	if err != nil {
+		return "", err
+	}
+
+	return tokenString, nil
+}
+
+func GenerateRefreshJWT(uid int, privateKey *rsa.PrivateKey) (string, error) {
+	exp, _ := strconv.Atoi(os.Getenv("jwt_refresh_exp"))
+	claims := jwt.MapClaims{
+		"sub": uid,
+		"iat": time.Now().Unix(),
+		"exp": time.Now().Add(time.Duration(exp) * time.Hour * 24).Unix(),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)

@@ -20,8 +20,17 @@ func New(privateKey *rsa.PrivateKey, userRepo *postgres.UserRepo) JWT {
 	}
 }
 
-func (t *JWT) CreateJWT(uid int) (string, error) {
-	token, err := auth.GenerateJWT(uid, t.privateKey)
+func (t *JWT) CreateAccessJWT(uid int) (string, error) {
+	token, err := auth.GenerateAccessJWT(uid, t.privateKey)
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
+}
+
+func (t *JWT) CreateRefreshJWT(uid int) (string, error) {
+	token, err := auth.GenerateRefreshJWT(uid, t.privateKey)
 	if err != nil {
 		return "", err
 	}
