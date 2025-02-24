@@ -1,15 +1,15 @@
 package server
 
 import (
-	"crypto/rand"
-	"crypto/rsa"
 	"database/sql"
 	"fmt"
 	"log"
+	"os"
 
 	jwttoken "github.com/VitaliyGopher/messanger/internal/app/auth"
 	"github.com/VitaliyGopher/messanger/internal/app/verification_code"
 	"github.com/VitaliyGopher/messanger/internal/pkg/postgres"
+	rsa_key "github.com/VitaliyGopher/messanger/pkg/rsa"
 	"github.com/gin-gonic/gin"
 
 	_ "github.com/lib/pq"
@@ -57,10 +57,11 @@ func Start(config *Config) error {
 
 	verifyCode := verification_code.New(verifyCodeRepo, userRepo)
 
-	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	privateKey, err := rsa_key.LoadOrGenerateRSA(os.Getenv("rsa_filename"))
 	if err != nil {
-		log.Fatalf("error in generating rsa keys: %s", err)
+		log.Fatal("rsa error: ", err)
 	}
+
 	jwt := jwttoken.New(privateKey, userRepo)
 
 	s := newServer(*store, verifyCode, jwt)

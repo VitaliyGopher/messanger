@@ -16,6 +16,7 @@ func GenerateAccessJWT(uid int, privateKey *rsa.PrivateKey) (string, error) {
 		"sub": uid,
 		"iat": time.Now().Unix(),
 		"exp": time.Now().Add(time.Duration(exp) * time.Minute).Unix(),
+		"type": "access",
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
@@ -34,6 +35,7 @@ func GenerateRefreshJWT(uid int, privateKey *rsa.PrivateKey) (string, error) {
 		"sub": uid,
 		"iat": time.Now().Unix(),
 		"exp": time.Now().Add(time.Duration(exp) * time.Hour * 24).Unix(),
+		"type": "refresh",
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)

@@ -47,7 +47,7 @@ func (s *server) GetJWT(c *gin.Context) {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	
+
 	refresh_token, err := s.jwt.CreateRefreshJWT(int(u.ID))
 	if err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -55,7 +55,21 @@ func (s *server) GetJWT(c *gin.Context) {
 	}
 
 	c.IndentedJSON(http.StatusCreated, gin.H{
-		"access_token": access_token,
+		"access_token":  access_token,
 		"refresh_token": refresh_token,
+	})
+}
+
+func (s *server) GetAccessJWT(c *gin.Context) {
+	refresh := c.PostForm("refresh_token")
+
+	access, err := s.jwt.GetAccessJWT(refresh)
+	if err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, gin.H{
+		"access_token": access,
 	})
 }
