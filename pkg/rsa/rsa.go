@@ -15,8 +15,6 @@ func LoadOrGenerateRSA(filename string) (*rsa.PrivateKey, error) {
 		return nil, err
 	}
 
-	
-
 	return privateKey, nil
 }
 

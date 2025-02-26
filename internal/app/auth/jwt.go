@@ -39,22 +39,29 @@ func (t *JWT) CreateRefreshJWT(uid int) (string, error) {
 	return token, nil
 }
 
-func (t *JWT) GetAccessJWT(refresh string) (string, error) {
+func (t *JWT) GetNewJWT(refresh string) (map[string]string, error) {
 	claims, err := auth.VerifyJWT(refresh, &t.privateKey.PublicKey)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	if claims["type"] != "refresh" {
-		return "", errors.New("is not refresh token")
+		return nil, errors.New("is not refresh token")
 	}
 
-	token, err := t.CreateAccessJWT(int(claims["sub"].(float64)))
+	access_token, err := t.CreateAccessJWT(int(claims["sub"].(float64)))
 	if err != nil {
-		return "", err
+		return nil, err
+	}
+	refresh_token, err := t.CreateRefreshJWT(int(claims["sub"].(float64)))
+	if err != nil {
+		return nil, err
 	}
 
-	return token, nil
+	return map[string]string{
+		"access": access_token,
+		"refresh": refresh_token,
+	}, nil
 }
 
 func (t *JWT) ParseToken(tokenStr string) (*model.User, error) {

@@ -5,5 +5,5 @@ func (s *server) configureRouter() {
 
 	s.router.POST("/sendCode", s.SendCodeHandler)
 	s.router.POST("/createJwt", s.GetJWT)
-	s.router.POST("/getAccess", s.GetAccessJWT)
+	s.router.POST("/getNewJWT", s.GetNewJWT)
 }
