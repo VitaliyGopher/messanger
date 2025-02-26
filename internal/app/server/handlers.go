@@ -2,7 +2,6 @@ package server
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/VitaliyGopher/messanger/internal/pkg/model"
 	"github.com/gin-gonic/gin"
@@ -13,8 +12,15 @@ func (s *server) Ping(c *gin.Context) {
 }
 
 func (s *server) SendCodeHandler(c *gin.Context) {
-	email := c.PostForm("email")
-	sms, err := s.verifyCode.SendCode(email)
+	type requset struct {
+		Email string `json:"email"`
+	}
+	var req requset
+	if err := c.BindJSON(&req); err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	sms, err := s.verifyCode.SendCode(req.Email)
 	if err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -27,16 +33,22 @@ func (s *server) SendCodeHandler(c *gin.Context) {
 }
 
 func (s *server) GetJWT(c *gin.Context) {
-	email := c.PostForm("email")
-	code := c.PostForm("code")
+	type requset struct {
+		Email string `json:"email"`
+		Code  int    `json:"code"`
+	}
+	var req requset
 
-	code_int, _ := strconv.Atoi(code)
+	if err := c.BindJSON(&req); err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
 	s.jwt.UserRepo.Create(&model.User{
-		Email: email,
+		Email: req.Email,
 	})
 
-	u, err := s.verifyCode.CheckCode(email, code_int)
+	u, err := s.verifyCode.CheckCode(req.Email, req.Code)
 	if err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -61,16 +73,24 @@ func (s *server) GetJWT(c *gin.Context) {
 }
 
 func (s *server) GetNewJWT(c *gin.Context) {
-	refresh := c.PostForm("refresh_token")
+	type requset struct {
+		Refresh string `json:"refresh_token"`
+	}
+	var req requset
 
-	tokens, err := s.jwt.GetNewJWT(refresh)
+	if err := c.BindJSON(&req); err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	tokens, err := s.jwt.GetNewJWT(req.Refresh)
 	if err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	c.IndentedJSON(http.StatusOK, gin.H{
-		"access_token": tokens["access"],
+		"access_token":  tokens["access"],
 		"refresh_token": tokens["refresh"],
 	})
 }

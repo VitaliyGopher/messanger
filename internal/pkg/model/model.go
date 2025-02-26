@@ -1,13 +1,13 @@
 package model
 
 type User struct {
-	ID          uint
-	Username    string
-	Email string
+	ID       uint   `json:"id"`
+	Username string `json:"username"`
+	Email    string `json:"email"`
 }
 
 type VerifyCode struct {
-	Email     string
-	Code      int
-	Timestamp int64
+	Email     string `json:"email"`
+	Code      int    `json:"verification_code"`
+	Timestamp int64  `json:"timestamp"`
 }
