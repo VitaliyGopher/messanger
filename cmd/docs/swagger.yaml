@@ -1,0 +1,104 @@
+definitions:
+  swagger.GetJWTParams:
+    properties:
+      code:
+        example: 0
+        type: integer
+      email:
+        example: some@some.com
+        type: string
+    type: object
+  swagger.GetNewJWTParams:
+    properties:
+      refresh_token:
+        example: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDMxODYyMzgsImlhdCI6MTc0MDU5NDIzOCwic3ViIjoyLCJ0eXBlIjoicmVmcmVzaCJ9.04yFALX79gM-r9Fj2ZVlUaY0oe3JW-swSzMvt1Sn5bId5rAEiibPghn4QqD3YHWySQnC9PE896j2fvpidEPetP3hZJ9ZhvJdhiNTn-2XVVkH8xyFCQyhB5_BK4dFnDxA2lbkGR14norjHbmokzWBm-ynC132Kh2LN6QmKJpn72t3Xo7ZCTmF4TMCTrfr_ET5zqKKpk343qx1_MefYEvfX9ZTFUC8QvasxfM2wFfbQCkco-qvMC-eAmI3BoIQtXPBnjrY8ifDj54nQi9qgNHX8H7Tzu5tS7AUdkwrkhGU-7oDkY1dYQobBugEL4CAD6TNCwaeduzSTMMB3K_TsgIHHw
+        type: string
+    type: object
+  swagger.SendCodeParams:
+    properties:
+      email:
+        example: some@some.com
+        type: string
+    type: object
+info:
+  contact: {}
+  description: Some description
+  title: StudBrige API
+  version: 0.0.1
+paths:
+  /createJwt:
+    post:
+      description: Returns jwt tokens and checks verification code
+      parameters:
+      - description: email and verification code
+        in: body
+        name: email_and_code
+        required: true
+        schema:
+          $ref: '#/definitions/swagger.GetJWTParams'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Returns jwt tokens
+      tags:
+      - auth
+  /getNewJWT:
+    post:
+      description: Refresh jwt tokens
+      parameters:
+      - description: refresh token
+        in: body
+        name: refresh_token
+        required: true
+        schema:
+          $ref: '#/definitions/swagger.GetNewJWTParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+      summary: Returns jwt tokens
+      tags:
+      - auth
+  /ping:
+    get:
+      description: ping-pong))
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Ping-pong
+      tags:
+      - ping
+  /sendCode:
+    post:
+      description: Returns a verification code for auth
+      parameters:
+      - description: email
+        in: body
+        name: email
+        required: true
+        schema:
+          $ref: '#/definitions/swagger.SendCodeParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Returns a verification code
+      tags:
+      - auth
+swagger: "2.0"

@@ -9,3 +9,6 @@ migration_down:
 
 migration_fix:
 	migrate -path ./migration/ -database "postgresql://postgres:postgres@localhost:5432/messanger?sslmode=disable" force 1
+
+swag:
+	swag init -g ./cmd/app/main.go -o cmd/docs

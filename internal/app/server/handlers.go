@@ -4,18 +4,36 @@ import (
 	"net/http"
 
 	"github.com/VitaliyGopher/messanger/internal/pkg/model"
+	_ "github.com/VitaliyGopher/messanger/internal/pkg/swagger"
 	"github.com/gin-gonic/gin"
 )
 
+// Ping			godoc
+// @Summary 	Ping-pong
+// @Description	ping-pong))
+// @Produce 	application/json
+// @Tags		ping
+// @Success 	200
+// @Router 		/ping [get]
 func (s *server) Ping(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gin.H{"message": "pong"})
 }
 
+// SendVerificationCode 			godoc
+// @Summary 						Returns a verification code
+// @Description 					Returns a verification code for auth
+// @Param 							email body swagger.SendCodeParams{} true "email"
+// @Produce							application/json
+// @Tags 							auth
+// @Success 						200
+// @Success 						400
+// @Success 						500
+// @Router							/sendCode [post]
 func (s *server) SendCodeHandler(c *gin.Context) {
-	type requset struct {
+	type request struct {
 		Email string `json:"email"`
 	}
-	var req requset
+	var req request
 	if err := c.BindJSON(&req); err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -32,12 +50,22 @@ func (s *server) SendCodeHandler(c *gin.Context) {
 	})
 }
 
+// GetJWT			godoc
+// @Summary			Returns jwt tokens
+// @Description		Returns jwt tokens and checks verification code
+// @Param			email_and_code body swagger.GetJWTParams{} true "email and verification code"
+// @Produce 		application/json
+// @Tags			auth
+// @Success 		201
+// @Success 		400
+// @Success 		500
+// @Router			/createJwt [post]
 func (s *server) GetJWT(c *gin.Context) {
-	type requset struct {
+	type request struct {
 		Email string `json:"email"`
 		Code  int    `json:"code"`
 	}
-	var req requset
+	var req request
 
 	if err := c.BindJSON(&req); err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -72,11 +100,20 @@ func (s *server) GetJWT(c *gin.Context) {
 	})
 }
 
+// GetNewJWT		godoc
+// @Summary			Returns jwt tokens
+// @Description		Refresh jwt tokens
+// @Param			refresh_token body swagger.GetNewJWTParams{} true "refresh token"
+// @Produce 		application/json
+// @Tags			auth
+// @Success 		200
+// @Success 		400
+// @Router			/getNewJWT [post]
 func (s *server) GetNewJWT(c *gin.Context) {
-	type requset struct {
+	type request struct {
 		Refresh string `json:"refresh_token"`
 	}
-	var req requset
+	var req request
 
 	if err := c.BindJSON(&req); err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})

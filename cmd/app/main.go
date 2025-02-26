@@ -6,6 +6,8 @@ import (
 	"github.com/BurntSushi/toml"
 	"github.com/VitaliyGopher/messanger/internal/app/server"
 	"github.com/VitaliyGopher/messanger/pkg/env"
+
+	_ "github.com/VitaliyGopher/messanger/cmd/docs"
 )
 
 var (
@@ -18,6 +20,9 @@ func init() {
 	}
 }
 
+// @title StudBrige API
+// @version 0.0.1
+// @description Some description
 func main() {
 	config := server.NewConfig()
 	_, err := toml.DecodeFile(CONFIG_PATH, &config)
